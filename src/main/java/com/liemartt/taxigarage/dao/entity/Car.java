@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name = "cars")
 @Getter
@@ -25,7 +27,9 @@ public class Car {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "car_type_id")
     private CarType type;
+    @OneToMany(mappedBy = "car")
+    private List<Review> reviews;
 }

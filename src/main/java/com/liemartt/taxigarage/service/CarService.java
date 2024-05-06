@@ -6,6 +6,8 @@ import com.liemartt.taxigarage.dao.repository.CarRepository;
 import com.liemartt.taxigarage.dao.repository.UserRepository;
 import com.liemartt.taxigarage.dto.CarDto;
 import com.liemartt.taxigarage.dto.CarMapper;
+import com.liemartt.taxigarage.dto.RentCarDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,28 +23,43 @@ public class CarService {
     private final CarMapper carMapper;
 
 
-    public List<CarDto> getAllCars() {
+    public List<Car> getAllCars() {
         List<Car> cars = carRepository.findAll();
-        return cars.stream().map(carMapper::toDto).toList();
+        return cars;
     }
-    public CarDto getCarById(Long id) {
-        Car car = carRepository.findById(id);
-        return carMapper.toDto(car);
+
+    public Optional<Car> getCarById(Long id) {
+        return carRepository.findById(id);
     }
-    public void createCar(CarDto carDto) {
+
+    public void saveCar(CarDto carDto) {
         Car car = carMapper.toEntity(carDto);
         car = carRepository.save(car);
     }
+
     public void deleteCarById(Long id) {
         carRepository.deleteById(id);
     }
-    public void addUserToCar(Long carId, Long userId) {
-        Car car = carRepository.findById(carId);
-        Optional<User> user = userRepository.findById(userId);
-        user.ifPresent(car::setUser);
+
+    @Transactional
+    public void addUserToCar(RentCarDto rentCarDto) {
+        Optional<Car> car = carRepository.findById(rentCarDto.carId());
+        Optional<User> user = userRepository.findById(rentCarDto.userId());
+        System.out.println(car);
+        System.out.println(user);
+        if (car.isPresent() && user.isPresent()) {
+            Car carEntity = car.get();
+            User userEntity = user.get();
+            carEntity.setUser(userEntity);
+        }
     }
+
     public void removeUserFromCar(Long carId) {
-        Car car = carRepository.findById(carId);
-        car.setUser(null);
+        Optional<Car> car = carRepository.findById(carId);
+        car.ifPresent(value -> value.setUser(null));
+    }
+    public List<Car> getAvailableCars() {
+        List<Car> cars = carRepository.findAll();
+        return cars.stream().filter(car->car.getUser()==null).toList();
     }
 }

@@ -23,4 +23,6 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Car> rentedCars;
+    @OneToMany(mappedBy = "author")
+    private List<Review> reviews;
 }

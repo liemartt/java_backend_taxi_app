@@ -1,5 +1,6 @@
 package com.liemartt.taxigarage.dao.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,9 @@ public class CarType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, unique = true)
     private String type;
     @OneToMany(mappedBy = "type")
+    @JsonIgnore
     private List<Car> carList;
 }
