@@ -1,25 +1,26 @@
 package com.liemartt.taxigarage.dao.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+public enum CarType {
+    SEDAN,
+    SUV,
+    TRUCK,
+    VAN,
+    COUPE,
+    HATCHBACK,
+    CONVERTIBLE,
+    SPORTS_CAR,
+    MINIVAN,
+    PICKUP_TRUCK,
+    COMPACT_CAR,
+    Type1,
+    Type2,
+    Type3,
+    Type4,
+    Type5,
+    Type6,
+    Type7,
+    Type8,
+    Type9,
+    Type10,
 
-import java.util.List;
-
-@Entity
-@Table(name = "car_type")
-@Getter
-@Setter
-@RequiredArgsConstructor
-public class CarType {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false, unique = true)
-    private String type;
-    @OneToMany(mappedBy = "type")
-    @JsonIgnore
-    private List<Car> carList;
 }

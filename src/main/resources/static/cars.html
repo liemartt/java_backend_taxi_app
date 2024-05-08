@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cars Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Your Website</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cars.html">Cars</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/rents.html">Rents</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reviews.html">Reviews</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin.html">Admin Panel</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-5">
+    <h1 class="mb-4">Cars Management</h1>
+    <button class="btn btn-primary mb-3" onclick="loadCars()">Load All Cars</button>
+    <button class="btn btn-secondary mb-3" onclick="loadAvailableCars()">Load Available Cars</button>
+    <div id="carsList"></div>
+</div>
+
+<!-- Modal for Car Details -->
+<div class="modal fade" id="carDetailsModal" tabindex="-1" aria-labelledby="carDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="carDetailsModalLabel">Car Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="carDetailsBody">
+                <!-- Car details will be displayed here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Car Reviews -->
+<div class="modal fade" id="carReviewsModal" tabindex="-1" aria-labelledby="carReviewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="carReviewsModalLabel">Car Reviews</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="carReviewsBody">
+                <!-- Car reviews will be displayed here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function loadCars() {
+        fetch('http://localhost:8080/api/cars')
+            .then(response => response.json())
+            .then(data => displayCars(data))
+            .catch(error => console.error('Error loading the cars:', error));
+    }
+
+    function loadAvailableCars() {
+        fetch('http://localhost:8080/api/cars/available')
+            .then(response => response.json())
+            .then(data => displayCars(data))
+            .catch(error => console.error('Error loading available cars:', error));
+    }
+
+    function displayCars(cars) {
+        console.log(cars);
+        const carsList = document.getElementById('carsList');
+        carsList.innerHTML = ''; // Clear previous entries
+        cars.forEach(car => {
+            const carElement = document.createElement('div');
+            carElement.className = 'card mb-3';
+            carElement.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">${car.brand} - ${car.model} (${car.type})</h5>
+                <p class="card-text">Year: ${car.year}</p>
+                <p class="card-text">Available: ${!car.isRented}</p>
+                <button class="btn btn-info" onclick="viewCarDetails(${car.id})">View Details</button>
+                <button class="btn btn-success" onclick="rentCar(${car.id})">Rent</button>
+                <button class="btn btn-warning" onclick="viewCarReviews(${car.id})">View Reviews</button>
+            </div>
+        `;
+            carsList.appendChild(carElement);
+        });
+    }
+
+    function viewCarDetails(id) {
+        fetch(`http://localhost:8080/api/cars/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                const carDetailsBody = document.getElementById('carDetailsBody');
+                carDetailsBody.innerHTML = `
+                <p><strong>Brand:</strong> ${data.brand}</p>
+                <p><strong>Model:</strong> ${data.model}</p>
+                <p><strong>Year:</strong> ${data.year}</p>
+                <p><strong>Type:</strong> ${data.type}</p>
+            `;
+                const carDetailsModal = new bootstrap.Modal(document.getElementById('carDetailsModal'));
+                carDetailsModal.show();
+            })
+            .catch(error => console.error('Error viewing car details:', error));
+    }
+
+    function rentCar(id) {
+        fetch(`http://localhost:8080/api/cars/${id}/rent`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert('Car rented successfully!');
+                    loadCars(); // Reload cars to update the status
+                } else {
+                    alert('Failed to rent car');
+                }
+            })
+            .catch(error => console.error('Error renting the car:', error));
+    }
+
+    function viewCarReviews(id) {
+        fetch(`http://localhost:8080/api/cars/${id}/reviews`)
+            .then(response => response.json())
+            .then(reviews => {
+                const carReviewsBody = document.getElementById('carReviewsBody');
+                if (reviews.length > 0) {
+                    const reviewsList = reviews.map(review => `<li>User: ${review.author.name}, Rating: ${review.mark}, Content: ${review.content}, Date: ${review.date}</li>`).join('');
+                    carReviewsBody.innerHTML = `<ul>${reviewsList}</ul>`;
+                } else {
+                    carReviewsBody.innerHTML = '<p>No reviews available for this car.</p>';
+                }
+                const carReviewsModal = new bootstrap.Modal(document.getElementById('carReviewsModal'));
+                carReviewsModal.show();
+            })
+            .catch(error => console.error('Error loading reviews:', error));
+    }
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -18,11 +19,11 @@ public class User {
     private Long id;
     @Column(name = "username", unique=true, nullable = false)
     private String username;
-    @Column(name = "password", unique=true, nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private List<Car> rentedCars;
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Rent> rents;
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 }

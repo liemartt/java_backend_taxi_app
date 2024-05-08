@@ -1,13 +1,11 @@
 package com.liemartt.taxigarage.dao.entity;
-
-
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "cars")
@@ -24,12 +22,13 @@ public class Car {
     private String model;
     @Column(name = "year")
     private int year;
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "car_type_id")
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Rent> rents;
+    @Enumerated(EnumType.STRING)
     private CarType type;
-    @OneToMany(mappedBy = "car")
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
+    @Column(name = "isRented")
+    private boolean isRented;
+    //TODO add price per day
 }
