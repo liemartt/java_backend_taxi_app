@@ -14,6 +14,6 @@ public interface RentMapper {
     default RentResponseDto rentToRentResponseDto(Rent rent){
         CarDto carDto = CAR_MAPPER.toDto(rent.getCar());
         UserDto userDto = USER_MAPPER.userToUserDto(rent.getUser());
-        return new RentResponseDto(userDto, carDto, rent.getStartDate(), rent.getEndDate());
+        return new RentResponseDto(rent.getId(), userDto, carDto, rent.getStartDate(), rent.getEndDate(), rent.isHasReview());
     }
 }

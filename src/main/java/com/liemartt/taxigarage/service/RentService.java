@@ -9,6 +9,7 @@ import com.liemartt.taxigarage.dao.repository.UserRepository;
 import com.liemartt.taxigarage.dto.RentRequestDto;
 import com.liemartt.taxigarage.dto.RentResponseDto;
 import com.liemartt.taxigarage.mappers.RentMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,19 +34,20 @@ public class RentService {
         return rentRepository.findById(id);
     }
 
-    public List<RentResponseDto> getEndedRentsByUserId(Long userId) {
-        List<Rent> rents = rentRepository.findAllByUserId(userId);
+    public List<RentResponseDto> getEndedRentsByUsername(String username) {
+        List<Rent> rents = rentRepository.findAllByUserUsername(username);
         return rents.stream().filter(x -> x.getEndDate() != null).toList().stream().map(rentMapper::rentToRentResponseDto).toList();
     }
 
-    public List<RentResponseDto> getCurrentRentsByUserId(Long userId) {
-        List<Rent> rents = rentRepository.findAllByUserId(userId);
+    public List<RentResponseDto> getCurrentRentsByUsername(String username) {
+        List<Rent> rents = rentRepository.findAllByUserUsername(username);
         return rents.stream().filter(x -> x.getEndDate() == null).toList().stream().map(rentMapper::rentToRentResponseDto).toList();
     }
 
+    @Transactional
     public Optional<Rent> createRent(RentRequestDto rentCarDto) {
         Optional<Car> car = carRepository.findById(rentCarDto.carId());
-        Optional<User> user = userRepository.findById(rentCarDto.userId());
+        Optional<User> user = userRepository.findByUsername(rentCarDto.username());
 
         if (car.isPresent() && user.isPresent()) {
             Car carEntity = car.get();
@@ -62,6 +64,7 @@ public class RentService {
         return Optional.empty();
     }
 
+    @Transactional
     public void endRentById(Long rentId) {
         Optional<Rent> rent = rentRepository.findById(rentId);
         if (rent.isPresent()) {
@@ -74,7 +77,13 @@ public class RentService {
     public List<RentResponseDto> getAllRentsByUserId(Long userId) {
         return rentRepository.findAllByUserId(userId).stream().map(rentMapper::rentToRentResponseDto).toList();
     }
-    public int countRentsByCarAndUser(Long carId, Long userId){
-        return rentRepository.countRentsByCarIdAndUserId(carId, userId);
+
+    public List<RentResponseDto> getAllRentsByUsername(String username) {
+        return rentRepository.findAllByUserUsername(username).stream().map(rentMapper::rentToRentResponseDto).toList();
+    }
+
+    public int countRentsByCarAndUser(Long carId, String username){
+        User user = userRepository.findByUsername(username).get();
+        return rentRepository.countRentsByCarIdAndUserId(carId, user.getId());
     }
 }

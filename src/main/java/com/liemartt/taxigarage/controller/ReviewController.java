@@ -14,14 +14,13 @@ import java.util.List;
 public class ReviewController {
     private final ReviewService reviewService;
     private final ReviewMapper reviewMapper;
-
-    @GetMapping
-    public List<ReviewResponseDto> getAllReviews() {
-        return reviewService.getAllReviews();
-    }
     @GetMapping("/sort/{type}")
     //types: old, new, positive, negative
     public List<ReviewResponseDto> getFilteredReviews(@PathVariable String type) {
         return reviewService.getFilteredReviews(type);
+    }
+    @GetMapping
+    public List<ReviewResponseDto> getReviews() {
+        return reviewService.getAllReviews();
     }
 }

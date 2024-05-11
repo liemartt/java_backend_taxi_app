@@ -1,6 +1,7 @@
 package com.liemartt.taxigarage.service;
 
 import com.liemartt.taxigarage.dao.entity.Car;
+import com.liemartt.taxigarage.dao.entity.Rent;
 import com.liemartt.taxigarage.dao.entity.Review;
 import com.liemartt.taxigarage.dao.entity.User;
 import com.liemartt.taxigarage.dao.repository.CarRepository;
@@ -30,17 +31,15 @@ public class ReviewService {
     }
 
     @Transactional
-    public void createReview(ReviewRequestDto reviewRequestDto) {
+    public void createReview(Rent rent, ReviewRequestDto reviewRequestDto) {
         Review review = new Review();
-        Optional<Car> car = carRepository.findById(reviewRequestDto.getCarId());
-        Optional<User> user = userRepository.findById(reviewRequestDto.getAuthorId());
-        if (car.isPresent() && user.isPresent()) {
-            review.setCar(car.get());
-            review.setAuthor(user.get());
-            review.setMark(reviewRequestDto.getMark());
-            review.setContent(reviewRequestDto.getContent());
-            reviewRepository.save(review);
-        }
+        Car car = rent.getCar();
+        User user = rent.getUser();
+        review.setCar(car);
+        review.setAuthor(user);
+        review.setMark(reviewRequestDto.getMark());
+        review.setContent(reviewRequestDto.getContent());
+        reviewRepository.save(review);
     }
 
     public void deleteReview(Long id) {

@@ -1,4 +1,4 @@
 package com.liemartt.taxigarage.dto;
 
-public record RentRequestDto(Long userId, Long carId) {
+public record RentRequestDto(String username, Long carId) {
 }

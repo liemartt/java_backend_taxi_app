@@ -4,6 +4,7 @@ import com.liemartt.taxigarage.dao.entity.User;
 import com.liemartt.taxigarage.dto.*;
 import com.liemartt.taxigarage.mappers.CarMapper;
 import com.liemartt.taxigarage.service.CarService;
+import com.liemartt.taxigarage.service.JwtService;
 import com.liemartt.taxigarage.service.RentService;
 import com.liemartt.taxigarage.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class CarController {
     private final CarMapper carMapper;
     private final ReviewService reviewService;
     private final RentService rentService;
+    private final JwtService jwtService;
 
     @GetMapping
     public List<CarDto> getCars(){
@@ -44,10 +46,9 @@ public class CarController {
         return reviewService.getReviewsByCarId(id);
     }
     @PostMapping("/{id}/rent")
-    public void rentCar(@PathVariable Long id){
-        //TODO get userID from auth
-        Long userId = null;
-        RentRequestDto rentCarDto = new RentRequestDto(id, userId);
+    public void rentCar(@PathVariable Long id, @RequestParam("token") String token){
+        String username = jwtService.getUsername(token);
+        RentRequestDto rentCarDto = new RentRequestDto(username, id);
         log.info("Rent car");
         rentService.createRent(rentCarDto);
     }

@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface RentRepository extends JpaRepository<Rent, Long> {
     List<Rent> findAllByUserId(Long userId);
+    List<Rent> findAllByUserUsername(String username);
     List<Rent> findAllByCarId(Long carId);
     int countRentsByCarIdAndUserId(Long carId, Long userId);
 }

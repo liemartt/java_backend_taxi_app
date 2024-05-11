@@ -9,7 +9,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="/">Your Website</a>
+        <a class="navbar-brand" href="#" onclick="navigate('/welcome.html')">Taxi garage</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -17,16 +17,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="/cars.html">Cars</a>
+                    <a class="nav-link" href="#" onclick="navigate('/cars.html')">Cars</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/rents.html">Rents</a>
+                    <a class="nav-link" href="#" onclick="navigate('/rents.html')">Rents</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/reviews.html">Reviews</a>
+                    <a class="nav-link" href="#" onclick="navigate('/reviews.html')">Reviews</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin.html">Admin Panel</a>
+                    <a class="nav-link" href="#" onclick="navigate('/admin.html')">Admin Panel</a>
                 </li>
             </ul>
         </div>
@@ -71,22 +71,28 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function navigate(url) {
+        const token = localStorage.getItem('jwtToken');
+        window.location.href = url + '?token=Bearer ' + token;
+    }
     function loadCars() {
-        fetch('http://localhost:8080/api/cars')
+        const token = localStorage.getItem('jwtToken');
+        console.log(token);
+        fetch('http://localhost:8080/api/cars?token=Bearer '+token)
             .then(response => response.json())
             .then(data => displayCars(data))
             .catch(error => console.error('Error loading the cars:', error));
     }
 
     function loadAvailableCars() {
-        fetch('http://localhost:8080/api/cars/available')
+        const token = localStorage.getItem('jwtToken');
+        fetch('http://localhost:8080/api/cars/available?token=Bearer '+token)
             .then(response => response.json())
             .then(data => displayCars(data))
             .catch(error => console.error('Error loading available cars:', error));
     }
 
     function displayCars(cars) {
-        console.log(cars);
         const carsList = document.getElementById('carsList');
         carsList.innerHTML = ''; // Clear previous entries
         cars.forEach(car => {
@@ -107,7 +113,8 @@
     }
 
     function viewCarDetails(id) {
-        fetch(`http://localhost:8080/api/cars/${id}`)
+        const token = localStorage.getItem('jwtToken');
+        fetch(`http://localhost:8080/api/cars/${id}?token=Bearer ${token}`)
             .then(response => response.json())
             .then(data => {
                 const carDetailsBody = document.getElementById('carDetailsBody');
@@ -124,7 +131,8 @@
     }
 
     function rentCar(id) {
-        fetch(`http://localhost:8080/api/cars/${id}/rent`, { method: 'POST' })
+        const token = localStorage.getItem('jwtToken');
+        fetch(`http://localhost:8080/api/cars/${id}/rent?token=Bearer ${token}`, { method: 'POST' })
             .then(response => {
                 if (response.ok) {
                     alert('Car rented successfully!');
@@ -137,12 +145,13 @@
     }
 
     function viewCarReviews(id) {
-        fetch(`http://localhost:8080/api/cars/${id}/reviews`)
+        const token = localStorage.getItem('jwtToken');
+        fetch(`http://localhost:8080/api/cars/${id}/reviews?token=Bearer ${token}`)
             .then(response => response.json())
             .then(reviews => {
                 const carReviewsBody = document.getElementById('carReviewsBody');
                 if (reviews.length > 0) {
-                    const reviewsList = reviews.map(review => `<li>User: ${review.author.name}, Rating: ${review.mark}, Content: ${review.content}, Date: ${review.date}</li>`).join('');
+                    const reviewsList = reviews.map(review => `<li>User: ${review.author.username}, Rating: ${review.mark}, Content: ${review.content}, Date: ${review.date}</li>`).join('');
                     carReviewsBody.innerHTML = `<ul>${reviewsList}</ul>`;
                 } else {
                     carReviewsBody.innerHTML = '<p>No reviews available for this car.</p>';

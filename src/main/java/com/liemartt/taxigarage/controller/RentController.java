@@ -1,14 +1,17 @@
 package com.liemartt.taxigarage.controller;
 
 import com.liemartt.taxigarage.dao.entity.Rent;
+import com.liemartt.taxigarage.dao.entity.User;
 import com.liemartt.taxigarage.dto.RentResponseDto;
 import com.liemartt.taxigarage.dto.ReviewRequestDto;
+import com.liemartt.taxigarage.service.JwtService;
 import com.liemartt.taxigarage.service.RentService;
 import com.liemartt.taxigarage.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,44 +19,45 @@ import java.util.List;
 public class RentController {
     private final RentService rentService;
     private final ReviewService reviewService;
+    private final JwtService jwtService;
 
     @GetMapping
-    public List<RentResponseDto> getRents() {
-        //TODO get userID from auth
-        Long userId = null;
-        return rentService.getAllRentsByUserId(userId);
+    public List<RentResponseDto> getRents(@RequestParam("token") String token) {
+        String username = jwtService.getUsername(token);
+        return rentService.getAllRentsByUsername(username);
     }
 
     @PostMapping("/new-review")
-    public void saveNewReview(@RequestBody ReviewRequestDto reviewRequestDto) {
-        //TODO get userID from auth
-        Long userId = 4l;
-        reviewRequestDto.setAuthorId(userId);
-        int rentCounter = rentService.countRentsByCarAndUser(reviewRequestDto.getCarId(), userId);
-        if (rentCounter > 0) {
-            reviewService.createReview(reviewRequestDto);
+    public void saveNewReview(@RequestBody ReviewRequestDto reviewRequestDto, @RequestParam("token") String token) {
+        String username = jwtService.getUsername(token);
+        Optional<Rent> rent = rentService.getRentById(reviewRequestDto.getRentId());
+        if(rent.isPresent()&&!rent.get().isHasReview()&&rent.get().getEndDate()!=null) {
+            rent.get().setHasReview(true);
+            reviewService.createReview(rent.get(), reviewRequestDto);
         }
     }
 
     @GetMapping("/current")
-    public List<RentResponseDto> getCurrentRentsOfUser() {
-        //TODO get userID from auth
-        Long userId = null;
-        return rentService.getCurrentRentsByUserId(userId);
+    public List<RentResponseDto> getCurrentRentsOfUser(@RequestParam("token") String token) {
+        String username = jwtService.getUsername(token);
+        return rentService.getCurrentRentsByUsername(username);
     }
 
     @GetMapping("/ended")
-    public List<RentResponseDto> getEndedRentsOfUser() {
-        //TODO get userID from auth
-        Long userId = null;
-        return rentService.getEndedRentsByUserId(userId);
+    public List<RentResponseDto> getEndedRentsOfUser(@RequestParam("token") String token) {
+        String username = jwtService.getUsername(token);
+        return rentService.getEndedRentsByUsername(username);
     }
 
-    @GetMapping("/{rentId}/end")
-    public void endRent(@PathVariable Long rentId) {
-        Long userId = null;
-        //TODO get userID from auth
-        //TODO check if user have such rent
-        rentService.endRentById(rentId);
+    @PostMapping("/{rentId}/end")
+    public void endRent(@PathVariable Long rentId, @RequestParam("token") String token) {
+        String username = jwtService.getUsername(token);
+        Optional<Rent> rentOptional = rentService.getRentById(rentId);
+        if (rentOptional.isPresent()) {
+            Rent rent = rentOptional.get();
+            if (rent.getUser().getUsername().equals(username)) {
+                rentService.endRentById(rentId);
+            }
+        }
     }
 }

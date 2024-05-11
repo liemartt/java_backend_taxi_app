@@ -27,6 +27,8 @@ public class Rent {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+    @Column(name = "has_review")
+    private boolean hasReview;
 
     @PrePersist
     protected void onCreate() {
