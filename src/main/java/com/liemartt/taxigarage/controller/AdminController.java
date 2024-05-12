@@ -9,6 +9,7 @@ import com.liemartt.taxigarage.dto.ReviewResponseDto;
 import com.liemartt.taxigarage.mappers.CarMapper;
 import com.liemartt.taxigarage.dto.UserDto;
 import com.liemartt.taxigarage.mappers.RentMapper;
+import com.liemartt.taxigarage.mappers.UserMapper;
 import com.liemartt.taxigarage.service.CarService;
 import com.liemartt.taxigarage.service.RentService;
 import com.liemartt.taxigarage.service.ReviewService;
@@ -29,6 +30,7 @@ public class AdminController {
     private final RentService rentService;
     private final ReviewService reviewService;
     private final RentMapper rentMapper;
+    private final UserMapper userMapper;
 
     @GetMapping("/users")
     public List<UserDto> getAllUsers() {
@@ -36,9 +38,9 @@ public class AdminController {
     }
 
     @GetMapping("/user/{id}")
-    public User getUserById(@PathVariable Long id) {
+    public UserDto getUserById(@PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
-        return user.orElse(null);//TODO use dto elsewhere
+        return userMapper.userToUserDto(user.orElse(null));
     }
 
     @DeleteMapping("/user/{id}")
@@ -46,10 +48,14 @@ public class AdminController {
         userService.deleteUserById(id);
     }
 
-    @GetMapping("/rents")
+    @GetMapping("/all-rents")
     public List<RentResponseDto> getAllRents() {
         return rentService.getAllRents().stream().map(rentMapper::rentToRentResponseDto).toList();
-    }//TODO separate current rents and finished
+    }
+    @GetMapping("/rent/{id}")
+    public RentResponseDto getAllRents(@PathVariable Long id) {
+        return rentMapper.rentToRentResponseDto(rentService.getRentById(id).get());
+    }
     @PostMapping("/new-car")
     public void saveCar(@RequestBody CarDto carDto){
         carService.saveCar(carDto);
@@ -65,5 +71,9 @@ public class AdminController {
     @DeleteMapping("/car/{id}")
     public void deleteCarById(@PathVariable Long id) {
         carService.deleteCarById(id);
+    }
+    @PostMapping("/rent/{id}")
+    public void endRentById(@PathVariable Long id) {
+        rentService.endRentById(id);
     }
 }

@@ -36,7 +36,7 @@ public class AuthService {
         }
         UserDetails userDetails = userService.loadUserByUsername(authRequest.username());
         String token = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(token, userDetails.getAuthorities().stream().filter(x->x.getAuthority().equals("ROLE_ADMIN")).count()==1));
     }
 
     public ResponseEntity<?> signup(SignUpRequest registrationUserDto) {

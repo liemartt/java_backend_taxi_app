@@ -31,7 +31,7 @@ public class RentController {
     public void saveNewReview(@RequestBody ReviewRequestDto reviewRequestDto, @RequestParam("token") String token) {
         String username = jwtService.getUsername(token);
         Optional<Rent> rent = rentService.getRentById(reviewRequestDto.getRentId());
-        if(rent.isPresent()&&!rent.get().isHasReview()&&rent.get().getEndDate()!=null) {
+        if(rent.isPresent()&&!rent.get().getHasReview()&&rent.get().getEndDate()!=null) {
             rent.get().setHasReview(true);
             reviewService.createReview(rent.get(), reviewRequestDto);
         }

@@ -3,112 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .item {
-            border-bottom: 1px solid #dee2e6;
-            padding: 10px 0;
-        }
-
-        .btn-delete {
-            margin-left: 10px;
-        }
-
-        .btn-finish {
-            margin-left: 10px;
-        }
+        .container { margin-top: 20px; }
+        .header { margin-bottom: 20px; }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">Your Website</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="/cars">Cars</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/rents">Rents</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/reviews">Reviews</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin">Admin Panel</a>
-                </li>
-            </ul>
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <button class="btn btn-primary" onclick="fetchUsers()">Manage Users</button>
+        <button class="btn btn-secondary" onclick="fetchRents()">View Rents</button>
+        <button class="btn btn-info" onclick="fetchReviews()">View Reviews</button>
+        <button class="btn btn-dark" onclick="fetchCars()">Manage Cars</button>
+        <button class="btn btn-success" onclick="showAddCarForm()">Add New Car</button>
     </div>
-</nav>
-
-<div class="container mt-5">
-    <h1 class="mb-4">Admin Panel</h1>
-    <h2>Add New Car</h2>
-    <form id="addCarForm">
-        <div class="mb-3">
-            <label for="brandInput" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="brandInput" name="brand" required>
-        </div>
-        <div class="mb-3">
-            <label for="modelInput" class="form-label">Model</label>
-            <input type="text" class="form-control" id="modelInput" name="model" required>
-        </div>
-        <div class="mb-3">
-            <label for="yearInput" class="form-label">Year</label>
-            <input type="number" class="form-control" id="yearInput" name="year" required>
-        </div>
-        <div class="mb-3">
-            <label for="typeInput" class="form-label">Type</label>
-            <select class="form-select" id="typeInput" name="type" required>
-                <option value="SEDAN">Sedan</option>
-                <option value="SUV">SUV</option>
-                <option value="TRUCK">Truck</option>
-                <option value="SPORTS_CAR">Sports Car</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Car</button>
-    </form>
-
-    <div id="usersList" class="mt-5"></div>
-    <div id="rentsList" class="mt-5"></div>
-    <div id="reviewsList" class="mt-5"></div>
+    <div id="content" class="mt-3"></div>
 </div>
 
-<!-- Modal for User Details -->
-<div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
+<!-- Rent Details Modal -->
+<div class="modal fade" id="rentModal" tabindex="-1" aria-labelledby="rentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="userDetailsModalLabel">User Details</h5>
+                <h5 class="modal-title" id="rentModalLabel">Rent Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="userDetailsBody">
-                <!-- User details will be displayed here -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for Car Deletion -->
-<div class="modal fade" id="deleteCarModal" tabindex="-1" aria-labelledby="deleteCarModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteCarModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="deleteCarModalBody">
-                Are you sure you want to delete this car?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteCarBtn">Delete</button>
+            <div class="modal-body">
+                <!-- Details will be injected here -->
             </div>
         </div>
     </div>
@@ -116,159 +40,156 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        loadUsers();
-        loadRents();
-        loadReviews();
+    const modalInstance = new bootstrap.Modal(document.getElementById('rentModal'));
 
-        const addCarForm = document.getElementById('addCarForm');
-        addCarForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const formData = new FormData(addCarForm);
-            const carData = Object.fromEntries(formData.entries());
-            addCar(carData);
-        });
-    });
+    function navigate(url) {
+        const token = localStorage.getItem('jwtToken');
+        window.location.href = url + '?token=Bearer ' + token;
+    }
 
-    function loadUsers() {
-        fetch('http://localhost:8080/api/admin/users')
+    function fetchUsers() {
+        const token = localStorage.getItem('jwtToken');
+        fetch('/api/admin/users?token=Bearer ' + token)
             .then(response => response.json())
             .then(users => {
-                const usersList = document.getElementById('usersList');
-                usersList.innerHTML = '<h2>Users</h2>';
-                users.forEach(user => {
-                    const userElement = document.createElement('div');
-                    userElement.className = 'item';
-                    userElement.innerHTML = `
-                        <span>User ID: ${user.id}, Username: ${user.username}</span>
-                        <button class="btn btn-primary btn-view" onclick="viewUserDetails(${user.id})">View Details</button>
-                        <button class="btn btn-danger btn-delete" onclick="deleteUser(${user.id})">Delete</button>
-                    `;
-                    usersList.appendChild(userElement);
-                });
-            })
-            .catch(error => console.error('Error loading users:', error));
+                const usersHtml = users.map(user =>
+                    `<li>${user.username} - ${user.email} <button onclick="deleteUser(${user.id})">Delete</button></li>`
+                ).join('');
+                document.getElementById('content').innerHTML = `<ul>${usersHtml}</ul>`;
+            });
     }
 
-    function loadRents() {
-        fetch('http://localhost:8080/api/admin/rents')
+    function deleteUser(userId) {
+        const token = localStorage.getItem('jwtToken');
+        fetch(`/api/admin/user/${userId}?token=Bearer ` + token, { method: 'DELETE' })
+            .then(() => {
+                alert('User deleted successfully');
+                fetchUsers();  // Refresh the list
+            });
+    }
+
+    function fetchRents() {
+        const token = localStorage.getItem('jwtToken');
+        fetch('/api/admin/all-rents?token=Bearer ' + token)
             .then(response => response.json())
             .then(rents => {
-                const rentsList = document.getElementById('rentsList');
-                rentsList.innerHTML = '<h2>Rents</h2>';
-                rents.forEach(rent => {
-                    const rentElement = document.createElement('div');
-                    rentElement.className = 'item';
-                    const startDate = new Date(rent.startDate).toLocaleDateString();
-                    const endDate = new Date(rent.endDate).toLocaleDateString();
-                    rentElement.innerHTML = `
-                        <span>Rent ID: ${rent.id}, User: ${rent.user.username}, Car: ${rent.car.brand} ${rent.car.model}, Start Date: ${startDate}, End Date: ${endDate}</span>
-                        <button class="btn btn-primary btn-finish" onclick="finishRent(${rent.id})">Finish Rent</button>
-                    `;
-                    rentsList.appendChild(rentElement);
-                });
-            })
-            .catch(error => console.error('Error loading rents:', error));
+                const rentsHtml = rents.map(rent =>
+                    `<li>Rent ID: ${rent.id}, User: ${rent.user.username}, Car: ${rent.car.brand} ${rent.car.model}
+                 <button onclick="showRentDetails(${rent.id})">Details</button>
+                 ${rent.endDate ? '' : `<button class="btn btn-warning" onclick="endRentById(${rent.id})">End Rent</button>`}</li>`
+                ).join('');
+                document.getElementById('content').innerHTML = `<ul>${rentsHtml}</ul>`;
+            });
+    }
+    function endRentById(rentId) {
+        const token = localStorage.getItem('jwtToken');
+        fetch(`/api/admin/rent/${rentId}?token=Bearer ` + token, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    alert('Rent ended successfully');
+                    fetchRents();  // Refresh the rents list
+                } else {
+                    alert('Failed to end rent');
+                }
+            }).catch(error => {
+            console.error('Error:', error);
+            alert('Error ending rent');
+        });
     }
 
-    function loadReviews() {
-        fetch('http://localhost:8080/api/admin/reviews')
+
+
+    function showRentDetails(rentId) {
+        const token = localStorage.getItem('jwtToken');
+        fetch(`/api/admin/rent/${rentId}?token=Bearer ` + token)
+            .then(response => response.json())
+            .then(rent => {
+                const detailsHtml = `
+                    <p>User: ${rent.user.username}</p>
+                    <p>Car: ${rent.car.brand} ${rent.car.model}</p>
+                    <p>Start Date: ${rent.startDate}</p>
+                    <p>End Date: ${rent.endDate}</p>
+                    <p>Has Review: ${rent.hasReview ? 'Yes' : 'No'}</p>
+                `;
+                document.querySelector('.modal-body').innerHTML = detailsHtml;
+                modalInstance.show();
+            });
+    }
+
+    function fetchReviews() {
+        const token = localStorage.getItem('jwtToken');
+        fetch('/api/admin/reviews?token=Bearer ' + token)
             .then(response => response.json())
             .then(reviews => {
-                const reviewsList = document.getElementById('reviewsList');
-                reviewsList.innerHTML = '<h2>Reviews</h2>';
-                reviews.forEach(review => {
-                    const reviewElement = document.createElement('div');
-                    reviewElement.className = 'item';
-                    reviewElement.innerHTML = `
-                        <span>Review ID: ${review.id}, Author: ${review.author.username}, Car: ${review.car.brand} ${review.car.model}, Mark: ${review.mark}, Date: ${review.date}</span>
-                        <button class="btn btn-danger btn-delete" onclick="deleteReview(${review.id})">Delete</button>
-                    `;
-                    reviewsList.appendChild(reviewElement);
-                });
-            })
-            .catch(error => console.error('Error loading reviews:', error));
+                const reviewsHtml = reviews.map(review =>
+                    `<li>${review.content} by ${review.author.username} <button onclick="deleteReview(${review.id})">Delete</button></li>`
+                ).join('');
+                document.getElementById('content').innerHTML = `<ul>${reviewsHtml}</ul>`;
+            });
     }
 
-    function viewUserDetails(id) {
-        fetch(`http://localhost:8080/api/admin/user/${id}`)
+    function deleteReview(reviewId) {
+        const token = localStorage.getItem('jwtToken');
+        fetch(`/api/admin/review/${reviewId}?token=Bearer ` + token, { method: 'DELETE' })
+            .then(() => {
+                alert('Review deleted successfully');
+                fetchReviews();
+            });
+    }
+
+    function fetchCars() {
+        const token = localStorage.getItem('jwtToken');
+        fetch('/api/cars?token=Bearer ' + token)
             .then(response => response.json())
-            .then(user => {
-                const userDetailsBody = document.getElementById('userDetailsBody');
-                userDetailsBody.innerHTML = `
-                    <p><strong>User ID:</strong> ${user.id}</p>
-                    <p><strong>Username:</strong> ${user.username}</p>
-                `;
-                const userDetailsModal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
-                userDetailsModal.show();
-            })
-            .catch(error => console.error('Error viewing user details:', error));
+            .then(cars => {
+                const carsHtml = cars.map(car =>
+                    `<li>${car.brand} ${car.model}, Year: ${car.year} <button onclick="deleteCar(${car.id})">Delete</button></li>`
+                ).join('');
+                document.getElementById('content').innerHTML = `<ul>${carsHtml}</ul>`;
+            });
     }
 
-    function deleteUser(id) {
-        // Show modal confirmation
-        const deleteCarModal = new bootstrap.Modal(document.getElementById('deleteCarModal'));
-        const confirmDeleteCarBtn = document.getElementById('confirmDeleteCarBtn');
-        confirmDeleteCarBtn.onclick = function () {
-            fetch(`http://localhost:8080/api/admin/user/${id}`, { method: 'DELETE' })
-                .then(response => {
-                    if (response.ok) {
-                        alert('User deleted successfully!');
-                        loadUsers(); // Reload users list
-                    } else {
-                        alert('Failed to delete user');
-                    }
-                })
-                .catch(error => console.error('Error deleting user:', error));
-            deleteCarModal.hide();
+    function deleteCar(carId) {
+        const token = localStorage.getItem('jwtToken');
+        fetch(`/api/admin/car/${carId}?token=Bearer ` + token, { method: 'DELETE' })
+            .then(() => {
+                alert('Car deleted successfully');
+                fetchCars();  // Refresh the list
+            });
+    }
+
+    function showAddCarForm() {
+        document.getElementById('content').innerHTML = `
+            <form onsubmit="saveNewCar(event)">
+                <input type="text" id="brand" placeholder="Brand" required>
+                <input type="text" id="model" placeholder="Model" required>
+                <input type="number" id="year" placeholder="Year" required>
+                <button type="submit">Add Car</button>
+            </form>
+        `;
+    }
+
+    function saveNewCar(event) {
+        event.preventDefault();
+        const token = localStorage.getItem('jwtToken');
+        const car = {
+            brand: document.getElementById('brand').value,
+            model: document.getElementById('model').value,
+            year: parseInt(document.getElementById('year').value),
+            type: "SEDAN", // Assuming type is static for simplicity
+            isRented: false
         };
-        deleteCarModal.show();
-    }
 
-    function deleteReview(id) {
-        fetch(`http://localhost:8080/api/admin/review/${id}`, { method: 'DELETE' })
-            .then(response => {
-                if (response.ok) {
-                    alert('Review deleted successfully!');
-                    loadReviews(); // Reload reviews list
-                } else {
-                    alert('Failed to delete review');
-                }
-            })
-            .catch(error => console.error('Error deleting review:', error));
-    }
-
-    function finishRent(id) {
-        fetch(`http://localhost:8080/api/admin/rent/${id}`, { method: 'DELETE' })
-            .then(response => {
-                if (response.ok) {
-                    alert('Rent finished successfully!');
-                    loadRents(); // Reload rents list
-                } else {
-                    alert('Failed to finish rent');
-                }
-            })
-            .catch(error => console.error('Error finishing rent:', error));
-    }
-
-    function addCar(carData) {
-        fetch('http://localhost:8080/api/admin/new-car', {
+        fetch('/api/admin/new-car?token=Bearer ' + token, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(carData)
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('Car added successfully!');
-                    document.getElementById('addCarForm').reset(); // Reset form
-                    // Optionally, reload cars list
-                } else {
-                    alert('Failed to add car');
-                }
-            })
-            .catch(error => console.error('Error adding car:', error));
+            body: JSON.stringify(car)
+        }).then(() => {
+            alert('Car added successfully');
+            showAddCarForm(); // Optionally refresh form or clear fields
+        }).catch(error => console.error('Error:', error));
     }
 </script>
 </body>

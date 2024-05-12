@@ -57,6 +57,7 @@ public class RentService {
                 Rent rent = new Rent();
                 rent.setCar(carEntity);
                 rent.setUser(userEntity);
+                rent.setHasReview(false);
                 rentRepository.save(rent);
                 return Optional.of(rent);
             }

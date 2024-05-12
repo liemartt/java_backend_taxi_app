@@ -50,7 +50,9 @@
                 if (data.token) {  // Проверяем наличие токена в ответе, предполагая, что его наличие означает успешный вход
                     localStorage.setItem('jwtToken', data.token);
                     alert('Login successful!');
-                    window.location.href = 'welcome.html?token=Bearer '+data.token;
+                    if(data.isAdmin)
+                        window.location.href = 'admin.html?token=Bearer '+data.token;
+                    else window.location.href = 'welcome.html?token=Bearer '+data.token;
                     // Здесь может быть редирект или другие действия после успешного входа
                 } else {
                     alert('Login failed: ' + data.message);  // Убедитесь, что сервер действительно отправляет 'message' в случае ошибки
