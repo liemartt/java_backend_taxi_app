@@ -30,5 +30,6 @@ public class Car {
     private List<Review> reviews;
     @Column(name = "isRented")
     private boolean isRented;
-    //TODO add price per day
+    @Column(name = "price_per_day")
+    private Long pricePerDay;
 }

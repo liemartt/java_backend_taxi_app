@@ -22,7 +22,8 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    //private String email; TODO uncomment
+    @Column(name = "email")
+    private String email;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Rent> rents;
@@ -30,5 +31,4 @@ public class User {
     private List<Review> reviews;
     @Enumerated(EnumType.STRING)
     private Role role;
-
 }
