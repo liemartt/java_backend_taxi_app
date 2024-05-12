@@ -75,7 +75,7 @@
     function loadCars() {
         const token = localStorage.getItem('jwtToken');
         console.log(token);
-        fetch('http://localhost:8080/api/cars?token=Bearer '+token)
+        fetch('/api/cars?token=Bearer '+token)
             .then(response => response.json())
             .then(data => displayCars(data))
             .catch(error => console.error('Error loading the cars:', error));
@@ -83,7 +83,7 @@
 
     function loadAvailableCars() {
         const token = localStorage.getItem('jwtToken');
-        fetch('http://localhost:8080/api/cars/available?token=Bearer '+token)
+        fetch('/api/cars/available?token=Bearer '+token)
             .then(response => response.json())
             .then(data => displayCars(data))
             .catch(error => console.error('Error loading available cars:', error));
@@ -111,7 +111,7 @@
 
     function viewCarDetails(id) {
         const token = localStorage.getItem('jwtToken');
-        fetch(`http://localhost:8080/api/cars/${id}?token=Bearer ${token}`)
+        fetch(`/api/cars/${id}?token=Bearer ${token}`)
             .then(response => response.json())
             .then(data => {
                 const carDetailsBody = document.getElementById('carDetailsBody');
@@ -130,7 +130,7 @@
 
     function rentCar(id) {
         const token = localStorage.getItem('jwtToken');
-        fetch(`http://localhost:8080/api/cars/${id}/rent?token=Bearer ${token}`, { method: 'POST' })
+        fetch(`/api/cars/${id}/rent?token=Bearer ${token}`, { method: 'POST' })
             .then(response => {
                 if (response.ok) {
                     alert('Car rented successfully!');
@@ -144,7 +144,7 @@
 
     function viewCarReviews(id) {
         const token = localStorage.getItem('jwtToken');
-        fetch(`http://localhost:8080/api/cars/${id}/reviews?token=Bearer ${token}`)
+        fetch(`/api/cars/${id}/reviews?token=Bearer ${token}`)
             .then(response => response.json())
             .then(reviews => {
                 const carReviewsBody = document.getElementById('carReviewsBody');

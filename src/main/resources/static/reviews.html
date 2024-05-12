@@ -51,9 +51,9 @@
     function loadReviews() {
         const token = localStorage.getItem('jwtToken');
         const sortType = document.getElementById('sortType').value;
-        let url = 'http://localhost:8080/api/reviews';
+        let url = '/api/reviews';
         if (sortType) {
-            url = `http://localhost:8080/api/reviews/sort/${sortType}`;
+            url = `/api/reviews/sort/${sortType}`;
         }
         if (token) {
             url += `?token=Bearer ${token}`;

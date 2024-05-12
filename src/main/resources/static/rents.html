@@ -90,19 +90,19 @@
     }
     function loadAllRents() {
         const token = localStorage.getItem('jwtToken');
-        const url = `http://localhost:8080/api/rents?token=Bearer ${token}`;
+        const url = `/api/rents?token=Bearer ${token}`;
         fetchRents(url);
     }
 
     function loadEndedRents() {
         const token = localStorage.getItem('jwtToken');
-        const url = `http://localhost:8080/api/rents/ended?token=Bearer ${token}`;
+        const url = `/api/rents/ended?token=Bearer ${token}`;
         fetchRents(url);
     }
 
     function loadCurrentRents() {
         const token = localStorage.getItem('jwtToken');
-        const url = `http://localhost:8080/api/rents/current?token=Bearer ${token}`;
+        const url = `/api/rents/current?token=Bearer ${token}`;
         fetchRents(url);
     }
 
@@ -140,7 +140,7 @@
 
     function endRent(rentId) {
         const token = localStorage.getItem('jwtToken');
-        fetch(`http://localhost:8080/api/rents/${rentId}/end?token=Bearer ${token}`, {
+        fetch(`/api/rents/${rentId}/end?token=Bearer ${token}`, {
             method: 'POST'
         })
             .then(response => {
@@ -168,7 +168,7 @@
         const reviewRating = document.getElementById('reviewRating').value;
         const reviewData = { authorName: "Username", rentId: rentId, content: reviewContent, mark: reviewRating };
         const token = localStorage.getItem('jwtToken');
-        fetch(`http://localhost:8080/api/rents/new-review?token=Bearer ${token}`, {
+        fetch(`/api/rents/new-review?token=Bearer ${token}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
